@@ -1,5 +1,7 @@
 # AgentShield
 
+[English](README.en.md)
+
 AgentShield 提供 Linux 进程、文件和网络防护，以及原始事件审计、人工问询和受控 TLS 出口。
 
 - `as-runtime-config`：从真实后端可执行文件一次确定固定布局；严格读取、校验、版本化写入及唯一只读快照。
