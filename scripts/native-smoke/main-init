@@ -1,0 +1,66 @@
+#!/bin/sh
+PATH=/bin
+export PATH
+mount -t proc proc /proc
+mount -t sysfs sys /sys
+mount -t devtmpfs dev /dev
+mkdir -p /sys/fs/bpf /sys/fs/cgroup
+mount -t bpf bpf /sys/fs/bpf
+mount -t securityfs securityfs /sys/kernel/security
+mount -t cgroup2 cgroup2 /sys/fs/cgroup
+mount -o bind /suite/create-real /suite/create-view || exit 1
+mount -t tmpfs tmpfs /suite/audit-fs || exit 1
+mkdir -p /suite/audit-fs/watch
+/bin/busybox ip link set lo up || exit 1
+while read -r module; do
+    insmod "$module" || exit 1
+done < /suite/guest-kernel-modules
+printf 'AS_MAIN_TLS_CLOCK_UNIX='
+/bin/busybox date -u +%s
+# Record the actual minimal guest resolver before installing its ordinary loopback hosts.
+/suite/tls_pipeline_smoke --dnscheck
+mkdir -p /etc
+printf '127.0.0.1 localhost\n' > /etc/hosts
+/suite/tls_pipeline_smoke --dnscheck
+printf 'AS_MAIN_NATIVE_GUEST_BEGIN kernel='
+uname -r
+result=1
+if insmod /suite/as_wait.ko; then
+    case " $(cat /proc/cmdline) " in
+        *" as_native_create_smoke=1 "*) mode=--guest-create-only ;;
+        *) mode=--guest-main-smoke ;;
+    esac
+    /as/bin/as-service "$mode"
+    result=$?
+    if [ "$result" = 0 ] && [ "$mode" = --guest-main-smoke ]; then
+        /as/bin/as-service --guest-arm-cold-recovery
+        armed=$?
+        if [ "$armed" = 77 ]; then
+            probe=$(/suite/subject open /suite/files/ask)
+            printf '%s\n' "$probe"
+            case "$probe" in
+            *'"errno":5}')
+                /as/bin/as-service --guest-cold-recovery
+                result=$?
+                ;;
+            *)
+                printf 'AS_MAIN_COLD_FAILED_SOURCE_NOT_ENFORCED\n'
+                result=1
+                ;;
+            esac
+        else
+            printf 'AS_MAIN_COLD_NOT_ARMED exit=%s\n' "$armed"
+            result=1
+        fi
+    fi
+fi
+if [ "$result" = 0 ]; then
+    if rmmod as_wait; then
+        printf 'AS_MAIN_NATIVE_MODULE_UNLOADED\n'
+    else
+        printf 'AS_MAIN_NATIVE_MODULE_UNLOAD_FAILED\n'
+        result=1
+    fi
+fi
+printf 'AS_MAIN_NATIVE_GUEST_EXIT=%s\n' "$result"
+poweroff -f

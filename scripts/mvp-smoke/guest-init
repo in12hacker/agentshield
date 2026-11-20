@@ -1,0 +1,41 @@
+#!/bin/sh
+# All privileged operations below occur only inside the disposable guest.
+PATH=/bin:/usr/bin:/usr/sbin
+export PATH
+mount -t proc proc /proc || poweroff -f
+mount -t sysfs sys /sys || poweroff -f
+mount -t devtmpfs dev /dev || poweroff -f
+mkdir -p /sys/fs/bpf /sys/fs/cgroup /sys/kernel/security /etc
+mount -t bpf bpf /sys/fs/bpf || poweroff -f
+mount -t securityfs securityfs /sys/kernel/security || poweroff -f
+mount -t cgroup2 cgroup2 /sys/fs/cgroup || poweroff -f
+/bin/busybox ip link set lo up || poweroff -f
+while read -r module; do
+    insmod "$module" || poweroff -f
+done < /suite/guest-kernel-modules
+printf '127.0.0.1 localhost\n::1 as-ipv6.test\n' > /etc/hosts
+printf 'AS_MVP_GUEST_KERNEL='
+uname -r
+printf 'AS_MVP_GUEST_CLOCK_UNIX='
+/bin/busybox date -u +%s
+python3 -I -B -c 'import ssl,socket,json,subprocess,selectors,hashlib; print("AS_MVP_PYTHON_READY")' || poweroff -f
+result=1
+unloaded=0
+if insmod /suite/as_wait.ko; then
+    python3 -I -B /suite/middleware.py run --service /as/bin/as-service --fixtures /suite --output /suite/mvp-report
+    result=$?
+    if [ -f /suite/mvp-report/report.json ]; then
+        printf '\nAS_MVP_REPORT_BEGIN\n'
+        cat /suite/mvp-report/report.json
+        printf '\nAS_MVP_REPORT_END\n'
+    fi
+    if rmmod as_wait; then
+        unloaded=1
+        printf 'AS_MVP_NATIVE_MODULE_UNLOADED\n'
+    else
+        result=1
+        printf 'AS_MVP_NATIVE_MODULE_UNLOAD_FAILED\n'
+    fi
+fi
+printf 'AS_MVP_GUEST_EXIT=%s MODULE_UNLOADED=%s\n' "$result" "$unloaded"
+poweroff -f

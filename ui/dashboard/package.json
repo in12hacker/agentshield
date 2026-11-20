@@ -1,0 +1,31 @@
+{
+  "name": "@agentshield/dashboard-r68-ask",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
+    "prebuild": "npm run check:i18n",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "pretest": "npm run check:i18n",
+    "test": "node --test --test-isolation=none scripts/check-i18n.test.mjs && vitest run",
+    "test:browser": "playwright test",
+    "test:live": "playwright test --config=playwright.live.config.ts"
+  },
+  "dependencies": {
+    "lucide-react": "1.16.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.60.0",
+    "@types/node": "24.19.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "6.0.3",
+    "vite": "8.1.6",
+    "vitest": "4.1.12"
+  }
+}

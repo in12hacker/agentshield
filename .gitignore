@@ -1,0 +1,6 @@
+/target/
+/.runtime/
+.env*
+secrets/
+/.codex/
+__pycache__/

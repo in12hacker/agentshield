@@ -1,0 +1,62 @@
+# Install as <self_root>/config/rules.yaml and review scope/paths before enabling.
+# These examples are disabled; group and rule numbers determine matching order.
+groups:
+  - kind: process
+    id: example-process
+    number: 1
+    enabled: false
+    execution: { location: backend, stage: fast }
+    rules:
+      - id: example-block-execution
+        number: 1
+        enabled: true
+        scope: {kind: all_protected}
+        operations: [execute]
+        source:
+          executable: {operator: exact, value: /usr/bin/example-agent}
+          arguments:
+            - index: 1
+              pattern: {operator: exact, value: --unsafe}
+        target:
+          executable: {operator: glob, value: '/tmp/**'}
+        action: {type: deny, terminate: none}
+        deny_message: "AS已按规则阻止此操作，请停止重复尝试。"
+        log: true
+  - kind: file
+    id: example-file
+    number: 1
+    enabled: false
+    execution: { location: backend, stage: ask }
+    rules:
+      - id: example-ask-private-file
+        number: 1
+        enabled: true
+        scope: {kind: all_protected}
+        operations: [open]
+        source: {executable: {operator: exact, value: /usr/bin/example-agent}}
+        target: {path: {operator: glob, value: '/private/**'}}
+        action:
+          type: ask
+          timeout_ms: 30000
+          timeout: {type: deny, terminate: none}
+        deny_message: "AS未允许访问该受保护目录，请勿重试。"
+        log: true
+  - kind: network
+    id: example-network
+    number: 1
+    enabled: false
+    execution: { location: backend, stage: fast }
+    rules:
+      - id: example-allow-tls
+        number: 1
+        enabled: true
+        scope: {kind: all_protected}
+        operations: [connect]
+        source: {executable: {operator: exact, value: /usr/bin/example-agent}}
+        target:
+          remote_cidr: 192.0.2.0/24
+          remote_port: {first: 443, last: 443}
+          protocol: 6
+        action: {type: allow}
+        deny_message: ""
+        log: false

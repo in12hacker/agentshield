@@ -1,0 +1,18 @@
+[package]
+name = "as-runtime-config"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+http.workspace = true
+as-types = { path = "../../contracts/as-types" }
+sha2.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true
+rustix.workspace = true
+arc-swap.workspace = true
+serde.workspace = true
+serde-saphyr.workspace = true
+thiserror.workspace = true
+tokio.workspace = true

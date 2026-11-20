@@ -1,0 +1,28 @@
+[package]
+name = "as-driver-adapter"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+as-types = { path = "../../contracts/as-types" }
+async-trait.workspace = true
+async-io.workspace = true
+tokio = { workspace = true, features = ["process", "io-util"] }
+tokio-util.workspace = true
+rustix = { workspace = true, features = ["event", "net", "process", "thread"] }
+sha2.workspace = true
+tracing.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+bytes.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+http-body-util.workspace = true
+object = { version = "=0.37.3", default-features = false, features = ["read_core", "elf", "std"] }
+gimli = { version = "=0.32.3", default-features = false, features = ["read", "std"] }
+domain = { version = "=0.12.3", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+as-process-tree = { path = "../as-process-tree" }

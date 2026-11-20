@@ -1,0 +1,5 @@
+# AgentShield requires modern Linux BPF-LSM kernels. Use the locked getrandom
+# implementation of getrandom(2); static GNU builds must not select its legacy
+# dlsym / random-device fallback. Do not replace runtime entropy with fixed seeds.
+[target.'cfg(target_os = "linux")']
+rustflags = ["--cfg", 'getrandom_backend="linux_getrandom"']

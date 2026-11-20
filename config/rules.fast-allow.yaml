@@ -1,0 +1,278 @@
+# Editable Driver policy; the existing rule owner loads, saves and compiles it.
+# Explicit local authenticated control ports and the conference NAT/Docker resolvers
+# avoid putting their ordinary traffic behind userspace Ask. No code exemptions.
+# /proc access_mask 1 matches R and RW; it is not a read-only descriptor claim.
+groups:
+- kind: file
+  id: linux-self-protection-independent-mounts
+  number: 5
+  enabled: true
+  execution:
+    location: driver
+  rules:
+  - id: linux-self-protection-allow-independent-mount
+    number: 1
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - mount
+    source: {}
+    target:
+      mount_effect: independent_view
+    action:
+      type: allow
+    log: true
+- kind: file
+  id: linux-fast-allow-basic-devices
+  number: 3
+  enabled: true
+  execution:
+    location: driver
+  rules:
+  - id: linux-fast-allow-open-dev-null
+    number: 1
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /dev/null
+    action:
+      type: allow
+    log: false
+  - id: linux-fast-allow-open-dev-zero
+    number: 2
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /dev/zero
+    action:
+      type: allow
+    log: false
+  - id: linux-fast-allow-open-dev-random
+    number: 3
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /dev/random
+    action:
+      type: allow
+    log: false
+  - id: linux-fast-allow-open-dev-urandom
+    number: 4
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /dev/urandom
+    action:
+      type: allow
+    log: false
+- kind: file
+  id: linux-fast-allow-proc-system-info
+  number: 4
+  enabled: true
+  execution:
+    location: driver
+  rules:
+  - id: linux-fast-allow-open-proc-cpuinfo
+    number: 1
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /proc/cpuinfo
+      access_mask: 1
+    action:
+      type: allow
+    log: false
+  - id: linux-fast-allow-open-proc-meminfo
+    number: 2
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /proc/meminfo
+      access_mask: 1
+    action:
+      type: allow
+    log: false
+  - id: linux-fast-allow-open-proc-uptime
+    number: 3
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /proc/uptime
+      access_mask: 1
+    action:
+      type: allow
+    log: false
+  - id: linux-fast-allow-open-proc-version
+    number: 4
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /proc/version
+      access_mask: 1
+    action:
+      type: allow
+    log: false
+  - id: linux-fast-allow-open-proc-loadavg
+    number: 5
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /proc/loadavg
+      access_mask: 1
+    action:
+      type: allow
+    log: false
+  - id: linux-fast-allow-open-proc-stat
+    number: 6
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /proc/stat
+      access_mask: 1
+    action:
+      type: allow
+    log: false
+- kind: network
+  id: linux-fast-allow-local-control
+  number: 3
+  enabled: true
+  execution:
+    location: driver
+  rules:
+  - id: linux-fast-allow-as-control
+    number: 1
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - connect
+    - send
+    source: {}
+    target:
+      remote_cidr: 127.0.0.1/32
+      remote_port:
+        first: 8765
+        last: 8765
+      protocol: 6
+    action:
+      type: allow
+    deny_message: ''
+    log: false
+  - id: linux-fast-allow-gateway-control
+    number: 2
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - connect
+    - send
+    source: {}
+    target:
+      remote_cidr: 127.0.0.1/32
+      remote_port:
+        first: 18789
+        last: 18789
+      protocol: 6
+    action:
+      type: allow
+    deny_message: ''
+    log: false
+  - id: linux-fast-allow-docker-dns
+    number: 3
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - connect
+    - send
+    source: {}
+    target:
+      remote_cidr: 127.0.0.11/32
+      remote_port:
+        first: 53
+        last: 53
+      protocol: 17
+    action:
+      type: allow
+    deny_message: ''
+    log: false
+  - id: linux-fast-allow-vm-nat-dns
+    number: 4
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - connect
+    - send
+    source: {}
+    target:
+      remote_cidr: 10.0.2.3/32
+      remote_port:
+        first: 53
+        last: 53
+      protocol: 17
+    action:
+      type: allow
+    deny_message: ''
+    log: false

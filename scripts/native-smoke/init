@@ -1,0 +1,28 @@
+#!/bin/sh
+PATH=/bin
+export PATH
+mount -t proc proc /proc
+mount -t sysfs sys /sys
+mount -t devtmpfs dev /dev
+mkdir -p /sys/kernel/security
+mount -t securityfs none /sys/kernel/security
+mkdir -p /sys/fs/bpf
+mount -t bpf bpf /sys/fs/bpf
+printf 'AS_NATIVE_SDK_GUEST_BEGIN kernel='
+uname -r
+if insmod /suite/as_wait.ko; then
+    /suite/native_smoke --guest-diagnostic /suite
+    result=$?
+else
+    result=1
+fi
+if [ "$result" = 0 ]; then
+    if rmmod as_wait; then
+        printf 'AS_NATIVE_SDK_GUEST_MODULE_UNLOADED\n'
+    else
+        printf 'AS_NATIVE_SDK_GUEST_MODULE_UNLOAD_FAILED\n'
+        result=1
+    fi
+fi
+printf 'AS_NATIVE_SDK_GUEST_EXIT=%s\n' "$result"
+poweroff -f

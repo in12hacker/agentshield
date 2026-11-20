@@ -1,0 +1,106 @@
+# AgentShield Demo Test Cases
+
+This appliance includes stock OpenClaw, AgentShield, and ready-to-use demonstration rules. Configure your model key once, then run the cases below in OpenClaw chat. No rule editing is required.
+
+## Before you start
+
+1. Open **AgentShield Dashboard** and **OpenClaw** from the welcome page.
+2. In AgentShield, save your model key, select the preconfigured OpenClaw connection, and issue a phantom key.
+3. Use the desktop **Configure OpenClaw phantom key** shortcut to save the phantom key. The real model key stays in AgentShield.
+4. Keep the AgentShield page visible beside OpenClaw. Send one test prompt at a time and answer its popup immediately. The rule's normal deadline is 30 seconds; an unanswered request is denied.
+
+The dashboard may use Chinese labels: **允许本次** means **Allow once**; **拒绝本次** means **Deny once**. Read the requested action below before sending the prompt.
+
+## 1. Process execution — Allow once
+
+When the **Execute program** popup targets `/usr/bin/printf`, click **Allow once**.
+
+Paste into OpenClaw:
+
+```text
+Use the exec tool to run the external program /usr/bin/printf '%s\n' AS_DEMO_PROCESS_ALLOW. Report the tool's actual output and exit status.
+```
+
+Expected: the original external program prints `AS_DEMO_PROCESS_ALLOW` and exits with status `0`. A shell built-in printing the same text does not demonstrate external process execution; check the actual tool command.
+
+## 2. Process execution — Deny once
+
+When the **Execute program** popup targets `/usr/bin/printf`, click **Deny once**.
+
+```text
+Use the exec tool to run the external program /usr/bin/printf '%s\n' AS_DEMO_PROCESS_DENY. Report this invocation's actual output and exit status.
+```
+
+Expected: the external program is denied. The tool reports a permission error and a nonzero exit status. The AS popup must show a user denial; a timeout denial is a different result. Any alternative command attempted by the model is a separate operation.
+
+## 3. File access — Allow once
+
+When the file popup targets `/home/node/.openclaw/workspace/as-demo/ask-file.txt`, click **Allow once**.
+
+```text
+Use the read tool to read /home/node/.openclaw/workspace/as-demo/ask-file.txt. Report the actual result and the content returned by this read.
+```
+
+Expected: the tool reads the preinstalled file and returns `AS_FILE_DEMO_OK`.
+
+## 4. File access — Deny once
+
+When the popup targets the same demonstration file, click **Deny once**.
+
+```text
+Make a new read-tool call for /home/node/.openclaw/workspace/as-demo/ask-file.txt. Report this call's actual result; do not reuse content from an earlier read.
+```
+
+Expected: the new read fails with a permission error and returns no file content. Earlier content already present in the conversation is not a successful new read.
+
+## 5. Website connection through curl — Allow once
+
+When the **Connect** popup targets the preinstalled demo website at `{{DEMO_HTTP_ADDRESS}}`, click **Allow once**.
+
+```text
+Use the exec tool to start curl and request {{DEMO_HTTP_URL}}. Report this request's HTTP status, response body, and curl exit status.
+```
+
+Expected: curl establishes the connection, receives HTTP `200`, and the body contains `AS_NETWORK_DEMO_OK`. OpenClaw must launch curl through a real tool call.
+
+## 6. Website connection through curl — Deny once
+
+When the **Connect** popup targets `{{DEMO_HTTP_ADDRESS}}`, click **Deny once**.
+
+```text
+Use the exec tool to make a new curl request to {{DEMO_HTTP_URL}}. Report this request's actual connection result and curl exit status. Do not reuse a previous response body.
+```
+
+Expected: the original connection is denied. curl reports a connection failure, with no new HTTP response. Report curl's own exit status separately from a wrapper shell's exit status.
+
+## 7. DNS query — Allow once
+
+The domain demo uses **{{DEMO_DNS_URL}}**. OpenClaw starts curl through a real tool call. AgentShield asks about the same DNS query for `{{DEMO_DNS_NAME}}`; the resolver address is shown in the technical details. Normal system, Docker, and model-provider DNS queries are outside this demonstration rule.
+
+When the **DNS query / network send** popup shows this name and resolver, click **Allow once**.
+
+```text
+Use the exec tool to run curl -4 {{DEMO_DNS_URL}}. Report the actual HTTP status, page title, and curl exit status from this invocation.
+```
+
+Expected: allow the DNS query for {{DEMO_DNS_NAME}}, then inspect the actual website response returned by curl. Also check the same query's QNAME and original request bytes in AS. This tests the DNS step of website access; it does not infer the identity of later connections from a cached DNS answer.
+
+## 8. DNS query — Deny once
+
+When the DNS popup shows `{{DEMO_DNS_NAME}}`, click **Deny once**.
+
+```text
+Use the exec tool to make a new curl -4 request to {{DEMO_DNS_URL}}. Report only this invocation's actual response, resolver error, and curl exit status.
+```
+
+Expected: AS records a user denial for this DNS query. The query cannot complete normally. Keep its send error, retry, or resolver error exactly as returned by the actual tool.
+
+## Reading the result
+
+- Confirm the target and operation in the AS popup, your **Allow once** or **Deny once** decision, and the original operation result.
+- Expand OpenClaw's tool card to inspect its actual command, output, and exit status. Read the assistant's final response separately.
+- A timeout is not a manual denial. A model fallback, a cached answer, or a manually run host command does not replace the requested tool result.
+- A file preview in the OpenClaw interface can trigger an additional file popup. It is a UI read, separate from the chat tool call.
+- Candidate behavior-chain links and confirmed links have different meanings. If a link or rejection explanation is missing, retain that observation; do not assume it was delivered.
+
+The demonstration rules and target resources are installed by the image. To change the policy later, use the normal AgentShield rules interface.

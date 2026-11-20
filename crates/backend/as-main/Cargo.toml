@@ -1,0 +1,39 @@
+[package]
+name = "as-main"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+as-types = { path = "../../contracts/as-types" }
+as-policy-engine = { path = "../as-policy-engine" }
+serde.workspace = true
+serde_json = { workspace = true, features = ["raw_value"] }
+zeroize.workspace = true
+sha2.workspace = true
+subtle.workspace = true
+rustix = { workspace = true, features = ["process", "fs"] }
+as-runtime-config = { path = "../as-runtime-config" }
+as-process-tree = { path = "../as-process-tree" }
+as-credentials = { path = "../as-credentials" }
+as-flow = { path = "../as-flow" }
+as-security-log = { path = "../as-security-log" }
+tokio = { workspace = true, features = ["io-util", "signal"] }
+tokio-util.workspace = true
+futures.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+[dev-dependencies]
+rusqlite.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+http-body-util.workspace = true
+bytes.workspace = true
+tokio-rustls.workspace = true
+rustls.workspace = true
+rustls-native-certs.workspace = true
+rcgen.workspace = true
+serde-saphyr.workspace = true
+async-trait.workspace = true
+tempfile.workspace = true
+as-driver-adapter = { path = "../as-driver-adapter" }

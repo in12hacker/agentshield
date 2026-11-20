@@ -1,0 +1,10 @@
+*.o
+*.ko
+*.ko.*
+*.mod
+*.mod.c
+*.cmd
+.Module.symvers.cmd
+Module.symvers
+modules.order
+native/

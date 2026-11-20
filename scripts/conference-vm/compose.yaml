@@ -1,0 +1,16 @@
+name: agentshield-conference
+services:
+  openclaw:
+    image: ${OPENCLAW_IMAGE}
+    ports:
+      - 127.0.0.1:18789:18789
+    environment:
+      HOME: /home/node
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
+      OPENCLAW_NO_RESPAWN: "1"
+      NODE_COMPILE_CACHE: /home/node/.openclaw/cache/node-compile
+      NODE_EXTRA_CA_CERTS: /opt/as-conference/as-ca.pem
+    volumes:
+      - /home/demo/.openclaw:/home/node/.openclaw
+      - /opt/as-conference/as-ca.pem:/opt/as-conference/as-ca.pem:ro
+    command: [node, dist/index.js, gateway, --bind, lan, --port, "18789", --allow-unconfigured]

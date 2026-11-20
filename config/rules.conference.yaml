@@ -1,0 +1,145 @@
+# First-boot demo fragment. Disabled until the actual Docker container scope
+# and @docker_gateway_ipv4@/32 are projected and published by the rule owner.
+groups:
+- kind: process
+  id: conference-process-review
+  number: 100
+  enabled: false
+  execution:
+    location: backend
+    stage: ask
+  rules:
+  - id: conference-review-execution
+    number: 1
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - execute
+    source: {}
+    target:
+      executable:
+        operator: exact
+        value: /usr/bin/printf
+    action:
+      type: ask
+      timeout_ms: 30000
+      timeout:
+        type: deny
+        terminate: none
+    log: true
+    deny_message: AgentShield 已拒绝本次进程执行。请报告拒绝，不要换命令或使用内建命令重试；需要时请用户在 AS 中允许或修改规则。
+- kind: file
+  id: conference-file-review
+  number: 100
+  enabled: false
+  execution:
+    location: backend
+    stage: ask
+  rules:
+  - id: conference-review-write-open
+    number: 1
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - open
+    source: {}
+    target:
+      path:
+        operator: exact
+        value: /home/node/.openclaw/workspace/as-demo/ask-file.txt
+    action:
+      type: ask
+      timeout_ms: 30000
+      timeout:
+        type: deny
+        terminate: none
+    log: true
+    deny_message: AgentShield 已拒绝访问本次文件。请报告拒绝，不要改路径或用其他工具重试；需要时请用户在 AS 中允许或修改规则。
+- kind: network
+  id: conference-network-review
+  number: 100
+  enabled: false
+  execution:
+    location: backend
+    stage: ask
+  rules:
+  - id: conference-review-connect
+    number: 1
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - connect
+    source: {}
+    target:
+      remote_cidr: '@docker_gateway_ipv4@/32'
+      remote_port:
+        first: 18088
+        last: 18088
+      protocol: 6
+    action:
+      type: ask
+      timeout_ms: 30000
+      timeout:
+        type: deny
+        terminate: none
+    log: true
+    deny_message: AgentShield 已拒绝本次网络连接。请报告拒绝，不要换地址或用其他工具重试；需要时请用户在 AS 中允许或修改规则。
+
+- kind: network
+  id: conference-dns-transfer
+  number: 2
+  enabled: false
+  execution:
+    location: driver
+  rules:
+  - id: conference-dns-curl-to-user
+    number: 1
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - send
+    source:
+      executable:
+        operator: exact
+        value: /usr/bin/curl
+    target:
+      remote_cidr: 127.0.0.11/32
+      remote_port: {first: 53, last: 53}
+      protocol: 17
+    action: {type: to_user}
+    log: false
+    deny_message: ''
+- kind: network
+  id: conference-dns-review
+  number: 101
+  enabled: false
+  execution:
+    location: backend
+    stage: ask
+  rules:
+  - id: conference-review-google-dns
+    number: 1
+    enabled: true
+    scope:
+      kind: all_protected
+    operations:
+    - send
+    source:
+      executable:
+        operator: exact
+        value: /usr/bin/curl
+    target:
+      remote_cidr: 127.0.0.11/32
+      remote_port: {first: 53, last: 53}
+      protocol: 17
+      domain: {operator: exact, value: www.google.com}
+    action:
+      type: ask
+      timeout_ms: 30000
+      timeout: {type: deny, terminate: none}
+    log: true
+    deny_message: AgentShield denied this DNS query. Report the denial and do not retry through another resolver or cached address. Ask the user to allow it or edit the rule in AS.

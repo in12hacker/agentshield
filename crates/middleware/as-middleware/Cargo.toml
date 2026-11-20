@@ -1,0 +1,39 @@
+[package]
+name = "as-middleware"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Structured business logging, activity queries and conditional execution feedback"
+
+[dependencies]
+as-policy-engine = { path = "../../backend/as-policy-engine" }
+async-trait.workspace = true
+bytes.workspace = true
+base64.workspace = true
+zeroize.workspace = true
+rustix = { workspace = true, features = ["process", "fs"] }
+futures.workspace = true
+getrandom.workspace = true
+tracing.workspace = true
+as-main = { path = "../../backend/as-main" }
+as-driver-adapter = { path = "../../backend/as-driver-adapter" }
+as-types = { path = "../../contracts/as-types" }
+serde.workspace = true
+serde_json = { workspace = true, features = ["raw_value"] }
+sha2.workspace = true
+httparse = "=1.10.1"
+flate2 = "=1.1.10"
+url.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["signal"] }
+tokio-tungstenite.workspace = true
+tokio-util.workspace = true
+rusqlite.workspace = true
+
+[dev-dependencies]
+as-security-log = { path = "../../backend/as-security-log" }
+as-kernel-common = { path = "../../contracts/as-kernel-common" }
+serde-saphyr.workspace = true
+zerocopy.workspace = true
+tempfile.workspace = true

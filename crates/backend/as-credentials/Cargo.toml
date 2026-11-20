@@ -1,0 +1,23 @@
+[package]
+name = "as-credentials"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+as-types = { path = "../../contracts/as-types" }
+async-trait.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+rustix = { workspace = true, features = ["process"] }
+http.workspace = true
+rustls.workspace = true
+rcgen = { version = "=0.13.2", features = ["x509-parser", "zeroize"] }
+time = "=0.3.47"
+zeroize.workspace = true
+base64 = "=0.22.1"
+getrandom = "=0.4.3"
+[dev-dependencies]
+tempfile.workspace = true

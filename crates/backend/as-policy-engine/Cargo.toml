@@ -1,0 +1,23 @@
+[package]
+name = "as-policy-engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+as-types = { path = "../../contracts/as-types" }
+serde.workspace = true
+serde-saphyr.workspace = true
+thiserror.workspace = true
+async-trait.workspace = true
+tokio.workspace = true
+arc-swap.workspace = true
+globset.workspace = true
+regex.workspace = true
+ipnet.workspace = true
+sha2.workspace = true
+tempfile.workspace = true
+rustix.workspace = true
+[dev-dependencies]
+serde_json.workspace = true

@@ -1,0 +1,20 @@
+[package]
+name = "as-types"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+as-kernel-common = { path = "../as-kernel-common" }
+tokio = { workspace = true, features = ["io-std", "io-util"] }
+tokio-util.workspace = true
+async-trait.workspace = true
+thiserror.workspace = true
+zerocopy.workspace = true
+serde.workspace = true
+bytes = { workspace = true, features = ["serde"] }
+rustls.workspace = true
+http.workspace = true
+url.workspace = true
+zeroize.workspace = true
+serde_json = { workspace = true, features = ["arbitrary_precision", "raw_value"] }

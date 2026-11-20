@@ -1,0 +1,49 @@
+#cloud-config
+users:
+- name: builder
+  sudo: ALL=(ALL) NOPASSWD:ALL
+  shell: /bin/bash
+  lock_passwd: true
+  ssh_authorized_keys:
+  - __BUILDER_SSH_PUBLIC_KEY__
+ssh_pwauth: false
+disable_root: true
+package_update: true
+packages:
+- build-essential
+- linux-headers-7.2.12+deb13-amd64
+- clang
+- llvm
+- libbpf-dev
+- libelf-dev/trixie-backports
+- zlib1g-dev
+- libzstd-dev
+- dwarves
+- bpftool
+- nftables
+- docker.io
+- docker-compose
+- python3-yaml
+- python3-websockets
+- nginx
+- xfce4
+- lightdm
+- firefox-esr
+- fonts-noto-cjk
+- xterm
+write_files:
+- path: /etc/default/grub.d/99-agentshield.cfg
+  content: 'GRUB_CMDLINE_LINUX_DEFAULT="lsm=landlock,lockdown,yama,integrity,apparmor,bpf"
+
+    GRUB_TIMEOUT=1
+
+    '
+runcmd:
+- - update-grub
+- - mkdir
+  - -p
+  - /mnt/payload
+- - sh
+  - -ec
+  - mount -t 9p -o trans=virtio,version=9p2000.L payload /mnt/payload; test -f /mnt/payload/scripts/conference-vm/prepare-guest.sh;
+    echo AS_CONFERENCE_PACKAGES_READY >/var/lib/as-packages-ready

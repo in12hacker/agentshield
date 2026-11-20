@@ -1,0 +1,19 @@
+[package]
+name = "as-process-tree"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+as-types = { path = "../../contracts/as-types" }
+tokio.workspace = true
+tokio-util.workspace = true
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+rustix.workspace = true
+thiserror.workspace = true
+[dev-dependencies]
+as-kernel-common = { path = "../../contracts/as-kernel-common" }
+zerocopy.workspace = true
